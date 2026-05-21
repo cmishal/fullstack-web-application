@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Trash2, Plus, FileText } from 'lucide-react'
+import { Trash2, Plus, FileText, Sparkles } from 'lucide-react'
 
 interface Note {
   id: string
@@ -47,66 +46,89 @@ export default function NotesList({ initialNotes }: { initialNotes: Note[] }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">My Notes</h1>
-          <p className="text-slate-500">Capture your thoughts and ideas quickly.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">My Notes</h1>
+          <p className="text-[var(--text-muted)] mt-1">Capture your thoughts and ideas quickly.</p>
         </div>
       </div>
 
-      <form onSubmit={addNote} className="p-6 bg-white rounded-2xl shadow-sm border border-slate-200 space-y-4">
-        <div className="grid gap-4">
+      {/* New Note Form */}
+      <div className="rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-primary)] overflow-hidden">
+        <form onSubmit={addNote} className="space-y-0">
           <input
             type="text"
             placeholder="Note Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 text-lg font-medium border-b border-slate-100 focus:border-blue-500 outline-none transition-colors bg-transparent"
+            className="w-full px-6 pt-6 pb-3 text-lg font-medium bg-transparent border-b border-[var(--border-primary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-indigo-500/50 transition-colors"
             required
           />
           <textarea
             placeholder="Write your note here..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full px-0 py-2 text-slate-600 outline-none resize-none min-h-[120px] bg-transparent"
+            className="w-full px-6 py-4 text-sm text-[var(--text-secondary)] bg-transparent outline-none resize-none min-h-[120px] placeholder-[var(--text-muted)]"
           />
-        </div>
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex items-center gap-2 px-6 py-2 font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:bg-blue-300 transition-all shadow-md shadow-blue-200"
-          >
-            <Plus size={18} />
-            {loading ? 'Saving...' : 'Add Note'}
-          </button>
-        </div>
-      </form>
+          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-primary)] bg-[var(--bg-primary)]/50">
+            <p className="text-xs text-[var(--text-muted)]">
+              <Sparkles size={12} className="inline mr-1" />
+              Markdown supported
+            </p>
+            <button
+              type="submit"
+              disabled={loading || !title.trim()}
+              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
+            >
+              <Plus size={16} />
+              {loading ? 'Saving...' : 'Add Note'}
+            </button>
+          </div>
+        </form>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Notes Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {notes.length === 0 ? (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 space-y-4">
-            <FileText size={48} strokeWidth={1} />
-            <p className="text-lg">No notes yet. Start by creating one above!</p>
+          <div className="col-span-full py-20 flex flex-col items-center justify-center text-[var(--text-muted)] space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-primary)] flex items-center justify-center">
+              <FileText size={32} strokeWidth={1} className="text-[var(--text-muted)]" />
+            </div>
+            <p className="text-lg font-medium text-[var(--text-secondary)]">No notes yet</p>
+            <p className="text-sm">Start by creating one above!</p>
           </div>
         ) : (
           notes.map((note) => (
-            <div key={note.id} className="p-6 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between group hover:shadow-md transition-all">
-              <div>
-                <h3 className="text-lg font-bold text-slate-800 mb-2">{note.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">{note.content}</p>
-<p className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 mt-6" suppressHydrationWarning>
-                    {new Date(note.created_at).toLocaleDateString()}
+            <div 
+              key={note.id} 
+              className="group relative rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-primary)] hover:border-indigo-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/5 overflow-hidden"
+            >
+              {/* Accent bar */}
+              <div className="h-1 w-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <div className="p-5 sm:p-6">
+                <h3 className="text-base font-bold text-[var(--text-primary)] mb-2 line-clamp-1">{note.title}</h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap line-clamp-4">
+                  {note.content}
+                </p>
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-[var(--border-primary)]">
+                  <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--text-muted)]" suppressHydrationWarning>
+                    {new Date(note.created_at).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
                   </p>
-              </div>
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={() => deleteNote(note.id)}
-                  className="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 size={18} />
-                </button>
+                  <button
+                    onClick={() => deleteNote(note.id)}
+                    className="p-2 rounded-lg text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                    title="Delete note"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           ))

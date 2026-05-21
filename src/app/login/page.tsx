@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock, LogIn, Globe } from 'lucide-react'
+import { Mail, Lock, LogIn, Globe, Sparkles } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -49,91 +49,113 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-xl text-white font-bold text-2xl shadow-lg shadow-blue-200 mb-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] p-4 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md space-y-8 relative">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-2xl shadow-xl shadow-indigo-500/20 mb-4">
             S
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome Back</h1>
-          <p className="text-slate-500">Sign in to access your secure notes</p>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">Welcome Back</h1>
+          <p className="text-[var(--text-muted)]">Sign in to access your secure workspace</p>
         </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200 space-y-6">
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 ml-1">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-slate-900"
-                  placeholder="name@example.com"
-                  required
-                />
+        {/* Auth Card */}
+        <div className="relative">
+          {/* Glow effect */}
+          <div className="absolute -inset-[1px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl blur-sm" />
+          
+          <div className="relative bg-[var(--bg-surface)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--border-primary)] space-y-6 shadow-2xl">
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[var(--text-secondary)] ml-1">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 outline-none transition-all text-[var(--text-primary)] placeholder-[var(--text-muted)]"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[var(--text-secondary)] ml-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 outline-none transition-all text-[var(--text-primary)] placeholder-[var(--text-muted)]"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <LogIn size={18} />
+                    Sign In
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[var(--border-primary)]"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-[var(--bg-surface)] px-3 text-[var(--text-muted)] font-medium">Or continue with</span>
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 ml-1">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-slate-900"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
+
             <button
-              type="submit"
+              onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 disabled:opacity-70"
+              className="w-full py-3 bg-[var(--bg-primary)] text-[var(--text-primary)] font-medium border border-[var(--border-primary)] rounded-xl hover:bg-[var(--bg-hover)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <LogIn size={18} />
-                  Sign In
-                </>
-              )}
+              <Globe size={18} className="text-indigo-400" />
+              Google Account
             </button>
-          </form>
 
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-slate-400 font-medium">Or continue with</span>
-            </div>
+            {message && (
+              <div className="p-3 rounded-xl bg-red-500/10 text-red-400 text-sm text-center font-medium border border-red-500/20">
+                {message}
+              </div>
+            )}
           </div>
-
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full py-3 bg-white text-slate-700 font-medium border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-          >
-            <Globe size={18} className="text-blue-500" />
-            Google Account
-          </button>
-
-          {message && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm text-center font-medium border border-red-100">
-              {message}
-            </div>
-          )}
         </div>
 
-        <p className="text-center text-slate-600 text-sm">
+        <p className="text-center text-[var(--text-secondary)] text-sm">
           Don&apos;t have an account?{' '}
-          <a href="/signup" className="text-blue-600 font-semibold hover:underline">Create account</a>
+          <a href="/signup" className="text-indigo-400 font-semibold hover:text-indigo-300 transition-colors">Create account</a>
         </p>
+
+        {/* Footer */}
+        <div className="flex items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
+          <Sparkles size={12} />
+          <span>End-to-end encrypted workspace</span>
+        </div>
       </div>
     </div>
   )

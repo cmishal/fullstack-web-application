@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Upload, File, Download, Trash2, Loader2, FolderOpen, Eye } from 'lucide-react'
+import { Upload, File, Download, Trash2, Loader2, FolderOpen, Eye, Sparkles } from 'lucide-react'
 
 interface Attachment {
   id: string
@@ -13,9 +13,16 @@ interface Attachment {
   created_at: string
 }
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
+
 export default function FilesList() {
   const [files, setFiles] = useState<Attachment[]>([])
   const [uploading, setUploading] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -97,7 +104,7 @@ export default function FilesList() {
     try {
       const { data, error } = await supabase.storage
         .from('documents')
-        .createSignedUrl(filePath, 60) // URL valid for 60 seconds
+        .createSignedUrl(filePath, 60)
 
       if (error) throw error
 
@@ -111,14 +118,12 @@ export default function FilesList() {
     if (!confirm('Are you sure you want to delete this file?')) return
 
     try {
-      // 1. Delete from Storage
       const { error: storageError } = await supabase.storage
         .from('documents')
         .remove([filePath])
 
       if (storageError) throw storageError
 
-      // 2. Delete from DB
       const { error: dbError } = await supabase
         .from('attachments')
         .delete()
@@ -133,103 +138,178 @@ export default function FilesList() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Documents</h1>
-          <p className="text-slate-500">Securely store and manage your important files.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">Documents</h1>
+          <p className="text-[var(--text-muted)] mt-1">Securely store and manage your important files.</p>
         </div>
       </div>
 
-      <div className="p-12 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-white text-center space-y-4">
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${uploading ? 'bg-blue-100 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
-          {uploading ? <Loader2 size={32} className="animate-spin" /> : <Upload size={32} />}
-        </div>
-        <div>
-          <p className="text-lg font-semibold">{uploading ? 'Uploading file...' : 'Upload your documents'}</p>
-          <p className="text-slate-500 text-sm">PDF, DOCX, JPG, PNG up to 5MB</p>
-        </div>
-        <input 
-          type="file" 
-          id="file-upload" 
-          className="hidden" 
-          onChange={handleUpload}
-          disabled={uploading}
-        />
-        <label 
-          htmlFor="file-upload"
-          className={`px-6 py-2 rounded-xl font-medium transition-all shadow-md ${
+      {/* Upload Zone */}
+      <div 
+        className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 overflow-hidden ${
+          dragOver 
+            ? 'border-indigo-500 bg-indigo-500/5 shadow-lg shadow-indigo-500/10' 
+            : 'border-[var(--border-primary)] bg-[var(--bg-surface)] hover:border-indigo-500/30'
+        }`}
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false) }}
+      >
+        <div className="p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-4">
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
             uploading 
-              ? 'bg-slate-200 text-slate-500 cursor-not-allowed' 
-              : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-blue-200'
-          }`}
-        >
-          {uploading ? 'Processing...' : 'Select File'}
-        </label>
+              ? 'bg-indigo-500/10 text-indigo-400' 
+              : dragOver
+                ? 'bg-indigo-500/20 text-indigo-400 scale-110'
+                : 'bg-[var(--bg-primary)] text-[var(--text-muted)]'
+          }`}>
+            {uploading ? <Loader2 size={32} className="animate-spin" /> : <Upload size={32} />}
+          </div>
+          <div>
+            <p className="text-lg font-semibold text-[var(--text-primary)]">
+              {uploading ? 'Uploading file...' : dragOver ? 'Drop your file here' : 'Upload your documents'}
+            </p>
+            <p className="text-[var(--text-muted)] text-sm mt-1">PDF, DOCX, JPG, PNG up to 5MB</p>
+          </div>
+          <input 
+            type="file" 
+            id="file-upload" 
+            className="hidden" 
+            onChange={handleUpload}
+            disabled={uploading}
+          />
+          <label 
+            htmlFor="file-upload"
+            className={`px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg text-sm ${
+              uploading 
+                ? 'bg-[var(--bg-primary)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border-primary)]' 
+                : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 cursor-pointer shadow-indigo-500/20 active:scale-[0.98]'
+            }`}
+          >
+            {uploading ? 'Processing...' : 'Select File'}
+          </label>
+        </div>
       </div>
 
-      <div className="grid gap-4">
+      {/* Files List */}
+      <div className="space-y-4">
         {files.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-4">
-            <FolderOpen size={48} strokeWidth={1} />
-            <p className="text-lg">No documents uploaded yet.</p>
+          <div className="py-20 flex flex-col items-center justify-center text-[var(--text-muted)] space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-primary)] flex items-center justify-center">
+              <FolderOpen size={32} strokeWidth={1} className="text-[var(--text-muted)]" />
+            </div>
+            <p className="text-lg font-medium text-[var(--text-secondary)]">No documents uploaded yet</p>
+            <p className="text-sm">Drop files above or click to browse</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
-                <tr>
-                  <th className="px-6 py-3 font-semibold">Name</th>
-                  <th className="px-6 py-3 font-semibold">Size</th>
-                  <th className="px-6 py-3 font-semibold">Date</th>
-                  <th className="px-6 py-3 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {files.map((file) => (
-                  <tr key={file.id} className="hover:bg-slate-50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <File size={18} className="text-slate-400" />
-                        <span className="font-medium text-slate-700">{file.file_name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">
-                      {(file.file_size / 1024).toFixed(1)} KB
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">
-                      <span suppressHydrationWarning>
-                        {new Date(file.created_at).toLocaleDateString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button 
-                          onClick={() => handleView(file.file_path)}
-                          className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-all"
-                          title="View File"
-                        >
-                          <Eye size={18} />
-                        </button>
-                        <button 
-                          onClick={() => handleDownload(file.file_path)}
-                          className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-all"
-                        >
-                          <Download size={18} />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(file.id, file.file_path)}
-                          className="p-2 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-all"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden sm:block rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-primary)] overflow-hidden">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-[var(--border-primary)] bg-[var(--bg-primary)]/50">
+                    <th className="px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Size</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-primary)]">
+                  {files.map((file) => (
+                    <tr key={file.id} className="hover:bg-[var(--bg-hover)] transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <File size={18} className="text-[var(--text-muted)] flex-shrink-0" />
+                          <span className="font-medium text-sm text-[var(--text-primary)] truncate max-w-[300px]">
+                            {file.file_name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
+                        {formatFileSize(file.file_size)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-[var(--text-secondary)]" suppressHydrationWarning>
+                        {new Date(file.created_at).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-1">
+                          <button 
+                            onClick={() => handleView(file.file_path)}
+                            className="p-2 rounded-lg text-[var(--text-muted)] hover:text-indigo-400 hover:bg-indigo-500/10 transition-all"
+                            title="View"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleDownload(file.file_path)}
+                            className="p-2 rounded-lg text-[var(--text-muted)] hover:text-indigo-400 hover:bg-indigo-500/10 transition-all"
+                            title="Download"
+                          >
+                            <Download size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(file.id, file.file_path)}
+                            className="p-2 rounded-lg text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 transition-all"
+                            title="Delete"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="sm:hidden space-y-3">
+              {files.map((file) => (
+                <div key={file.id} className="rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-primary)] p-4 space-y-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <File size={20} className="text-[var(--text-muted)] flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-[var(--text-primary)] truncate">{file.file_name}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{formatFileSize(file.file_size)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-primary)]">
+                    <button 
+                      onClick={() => handleView(file.file_path)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-indigo-400 hover:bg-indigo-500/10 transition-all"
+                    >
+                      View
+                    </button>
+                    <button 
+                      onClick={() => handleDownload(file.file_path)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-indigo-400 hover:bg-indigo-500/10 transition-all"
+                    >
+                      Download
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(file.id, file.file_path)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* File count */}
+            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+              <Sparkles size={12} />
+              <span>{files.length} document{files.length !== 1 ? 's' : ''} stored securely</span>
+            </div>
+          </>
         )}
       </div>
     </div>

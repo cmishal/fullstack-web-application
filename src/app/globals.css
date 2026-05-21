@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
+/* ── Dark Theme Color Palette ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-primary: #0f0f13;
+  --bg-secondary: #16161d;
+  --bg-surface: #1c1c26;
+  --bg-elevated: #24242e;
+  --bg-hover: #2a2a36;
+  --border-primary: #2a2a36;
+  --border-subtle: #1e1e28;
+  --text-primary: #f1f1f3;
+  --text-secondary: #a0a0b2;
+  --text-muted: #6b6b80;
+  --accent-primary: #6366f1;
+  --accent-secondary: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --gradient-primary: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --gradient-accent: linear-gradient(135deg, #6366f1 0%, #a78bfa 50%, #c084fc 100%);
+  --gradient-hero: linear-gradient(135deg, #1c1c26 0%, #16161d 100%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-dark-950: #0a0a0f;
+  --color-dark-900: #0f0f13;
+  --color-dark-800: #16161d;
+  --color-dark-700: #1c1c26;
+  --color-dark-600: #24242e;
+  --color-dark-500: #2a2a36;
+  --color-dark-400: #3a3a48;
+  --color-dark-300: #4a4a5a;
+  --color-dark-200: #6b6b80;
+  --color-dark-100: #a0a0b2;
+  --color-dark-50: #f1f1f3;
+  --color-accent-950: #1e1e3a;
+  --color-accent-900: #2e2e5a;
+  --color-accent-800: #3e3e7a;
+  --color-accent-700: #4f4f9a;
+  --color-accent-600: #6366f1;
+  --color-accent-500: #818cf8;
+  --color-accent-400: #a5b4fc;
+  --color-accent-300: #c7d2fe;
+  --color-accent-200: #e0e7ff;
+  --color-accent-100: #eef2ff;
+  --color-surface: var(--bg-surface);
+  --color-surface-elevated: var(--bg-elevated);
+  --color-border: var(--border-primary);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Base Styles ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a36 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #2a2a36;
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #3a3a48;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+}
+
+::selection {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* ── Focus Ring ── */
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* ── Autofill Fix ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-surface) inset;
+  transition: background-color 5000s ease-in-out 0s;
 }
