@@ -24,7 +24,11 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setMessage(error.message)
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        setMessage('Please confirm your email address first. Check your inbox for the confirmation link, or sign up again to resend it.')
+      } else {
+        setMessage(error.message)
+      }
     } else {
       router.push('/dashboard')
       router.refresh()

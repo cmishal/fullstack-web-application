@@ -31,9 +31,7 @@ function maskEmail(email: string) {
 
 function getAvatarUrl(userId: string, avatarUrl: string | null): string | null {
   if (!avatarUrl) return null
-  // If it's a full URL (like from a social provider or already absolute), return it
   if (avatarUrl.startsWith('http')) return avatarUrl
-  // Otherwise it's a storage path — construct the public URL
   return `${SUPABASE_URL}/storage/v1/object/public/avatars/${avatarUrl}`
 }
 
@@ -216,19 +214,16 @@ export default function ProfilePage() {
       const fileExt = file.name.split('.').pop()
       const filePath = `${userId}/avatar.${fileExt}`
 
-      // Upload to avatars bucket (upsert so it replaces existing)
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, { upsert: true })
 
       if (uploadError) throw uploadError
 
-      // Delete old avatar if it had a different extension
       if (profile.avatar_url && profile.avatar_url !== filePath) {
         await supabase.storage.from('avatars').remove([profile.avatar_url])
       }
 
-      // Update profile with the new path
       const { error: dbError } = await supabase
         .from('profiles')
         .upsert({ id: userId, avatar_url: filePath, updated_at: new Date().toISOString() })
@@ -246,7 +241,6 @@ export default function ProfilePage() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) handleAvatarUpload(file)
-    // Reset input so re-selecting the same file works
     e.target.value = ''
   }
 
@@ -437,11 +431,6 @@ export default function ProfilePage() {
             {/* Quick Stats */}
             <div className="hidden sm:flex items-center gap-6">
               <div className="text-center">
-                <div className="text-lg font-bold text-[var(--text-primary)]">2FA</div>
-                <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-medium">Security</div>
-              </div>
-              <div className="w-px h-10 bg-[var(--border-primary)]" />
-              <div className="text-center">
                 <div className="text-lg font-bold text-[var(--text-primary)]">Active</div>
                 <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-medium">Status</div>
               </div>
@@ -485,12 +474,6 @@ export default function ProfilePage() {
                     <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                     <span className="text-sm text-emerald-400 font-medium">Active</span>
                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[var(--text-secondary)]">2FA</span>
-                  <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    Not Enabled
-                  </span>
                 </div>
               </div>
             </div>

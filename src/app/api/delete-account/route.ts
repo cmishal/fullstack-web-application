@@ -59,10 +59,17 @@ export async function POST(request: Request) {
       await adminClient.storage.from('documents').remove(filePaths)
     }
 
-    // 2. Delete avatar from the avatars bucket
-    await adminClient.storage.from('avatars').remove([`${user.id}/avatar`])
+    // 2. Delete avatar(s) from the avatars bucket — list then remove all
+    const { data: avatarFiles } = await adminClient.storage
+      .from('avatars')
+      .list(user.id, { limit: 100 })
 
-    // 3. Delete user's data from tables (cascades will handle related records)
+    if (avatarFiles && avatarFiles.length > 0) {
+      const avatarPaths = avatarFiles.map((f) => `${user.id}/${f.name}`)
+      await adminClient.storage.from('avatars').remove(avatarPaths)
+    }
+
+    // 3. Delete user's data from tables
     await adminClient.from('notes').delete().eq('user_id', user.id)
     await adminClient.from('attachments').delete().eq('user_id', user.id)
     await adminClient.from('profiles').delete().eq('id', user.id)

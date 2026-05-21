@@ -89,3 +89,21 @@ set
   notification_email = true,
   notification_browser = true
 where notification_email is null;
+
+-- ═══════════════════════════════════════════════
+-- NEW: Supabase MFA (Multi-Factor Authentication)
+-- ═══════════════════════════════════════════════
+--
+-- MFA is configured in the Supabase Dashboard under:
+-- Authentication > Multi-Factor Authentication > Enable
+--
+-- No additional SQL is needed for MFA.
+-- The avatars bucket and profiles table are already set up above.
+--
+-- For MFA enrollment/unenrollment, the client-side supabase-js
+-- MFA APIs are used directly:
+--   supabase.auth.mfa.enroll()
+--   supabase.auth.mfa.challenge()
+--   supabase.auth.mfa.verify()
+--   supabase.auth.mfa.unenroll()
+--   supabase.auth.mfa.getAuthenticatorAssuranceLevel()
